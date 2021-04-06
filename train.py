@@ -13,8 +13,10 @@ from eval import eval_net
 from unet import UNet
 
 from torch.utils.tensorboard import SummaryWriter
-from utils.dataset import BasicDataset
+from Utils.dataset import BasicDataset
 from torch.utils.data import DataLoader, random_split
+
+import torch
 
 dir_img = 'data/imgs/'
 dir_mask = 'data/masks/'
@@ -89,7 +91,7 @@ def train_net(net,
 
                 pbar.update(imgs.shape[0])
                 global_step += 1
-                if global_step % (n_train // (10 * batch_size)) == 0:
+                if global_step % (n_train / (10 * batch_size)) == 0:
                     for tag, value in net.named_parameters():
                         tag = tag.replace('.', '/')
                         writer.add_histogram('weights/' + tag, value.data.cpu().numpy(), global_step)
@@ -143,9 +145,11 @@ def get_args():
 
 
 if __name__ == '__main__':
+    torch.cuda.empty_cache()
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
     args = get_args()
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cpu')
     logging.info(f'Using device {device}')
 
     # Change here to adapt to your data
